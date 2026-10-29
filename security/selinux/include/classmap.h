@@ -243,6 +243,13 @@ struct security_class_mapping secclass_map[] = {
 	{ NULL }
   };
 
-#if PF_MAX > 44
+/*
+ * PF_MAX here comes from the *host* libc headers (genheaders/mdp are host
+ * tools).  glibc >= 2.36 defines AF_MCTP (45), so PF_MAX is 46 even though
+ * this 4.14 kernel only knows address families up to AF_XDP (44).
+ * AF_MCTP is not supported by this kernel, so there is no class to add;
+ * just allow the newer host headers through.
+ */
+#if PF_MAX > 46
 #error New address family defined, please update secclass_map.
 #endif
