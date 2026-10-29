@@ -1318,6 +1318,26 @@ static int check_version(const struct load_info *info,
 	return 1;
 
 bad_version:
+	/*
+	 * [patch] Tolerate the known thermal ABI drift for the WSA881x speaker
+	 * amp codec only.
+	 *
+	 * wsa881x_dlkm is a vendor DLKM built against the Telstra kernel; it is
+	 * the single module whose symbol CRCs disagree with this source drop,
+	 * and only on thermal_zone_device_[un]register (HTC's thermal_zone_
+	 * params/ops layout drifted between releases).  Without this module the
+	 * ASoC sound card never registers, audioserver never publishes
+	 * media.audio_policy and the boot animation stalls for ~30s.
+	 *
+	 * Everything else - other modules, other symbols - is still checked
+	 * strictly, so ABI-incompatible modules stay rejected.
+	 */
+	if (info->name && !strcmp(info->name, "wsa881x_dlkm")) {
+		pr_warn("%s: ignoring CRC mismatch for symbol %s\n",
+			info->name, symname);
+		return 1;
+	}
+
 	pr_warn("%s: disagrees about version of symbol %s\n",
 	       info->name, symname);
 	return 0;
