@@ -1979,6 +1979,18 @@ bool icnss_is_qmi_disable(struct device *dev)
 }
 EXPORT_SYMBOL(icnss_is_qmi_disable);
 
+/*
+ * [patch] The vendor wlan.ko (built against a newer CAF icnss) imports
+ * icnss_is_pdr(), which this source drop does not have.  This icnss has no
+ * PDR (Protection Domain Restart) support at all, so report "not PDR" and let
+ * the WLAN driver fall back to the normal SSR/notifier path.
+ */
+bool icnss_is_pdr(void)
+{
+	return false;
+}
+EXPORT_SYMBOL(icnss_is_pdr);
+
 int icnss_get_ce_id(struct device *dev, int irq)
 {
 	int i;

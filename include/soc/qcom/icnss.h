@@ -143,6 +143,8 @@ extern bool icnss_is_qmi_disable(struct device *dev);
 extern bool icnss_is_fw_ready(void);
 extern bool icnss_is_fw_down(void);
 extern bool icnss_is_rejuvenate(void);
+/* [patch] imported by the vendor wlan.ko; this icnss has no PDR support */
+extern bool icnss_is_pdr(void);
 extern int icnss_trigger_recovery(struct device *dev);
 extern void icnss_block_shutdown(bool status);
 #endif /* _ICNSS_WLAN_H_ */
