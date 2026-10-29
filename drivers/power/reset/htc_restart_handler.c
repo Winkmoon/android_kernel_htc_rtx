@@ -79,7 +79,18 @@ static int panic_restart_action(struct notifier_block *this, unsigned long event
 	*/
 	if (ptr)
 		snprintf(kernel_panic_msg, rst_msg_size - 1, "KP: %s", (char *)ptr);
-	set_restart_to_ramdump(kernel_panic_msg);
+
+	/*
+	 * [patch] Reboot normally on kernel panic instead of entering ramdump
+	 * mode.
+	 *
+	 * RESTART_REASON_RAMDUMP makes aboot/xbl park the device in ramdump
+	 * collection waiting for a host tool: the screen stays on the boot logo
+	 * forever, it never boots the system and it never reboots.  Use the
+	 * normal 'reboot' reason instead; the panic message is still written to
+	 * the imem restart info so it remains readable after the reboot.
+	 */
+	set_restart_action(RESTART_REASON_REBOOT, kernel_panic_msg);
 
 	return NOTIFY_DONE;
 }
