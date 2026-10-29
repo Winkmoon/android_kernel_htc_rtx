@@ -738,7 +738,15 @@ EXPORT_SYMBOL(qmi_rmnet_qos_exit);
 #ifdef CONFIG_QCOM_QMI_POWER_COLLAPSE
 static struct workqueue_struct  *rmnet_ps_wq;
 static struct rmnet_powersave_work *rmnet_work;
-static struct list_head ps_list;
+/*
+ * Power-save indicators (struct qmi_rmnet_ps_ind) registered by
+ * qmi_rmnet_ps_ind_register().  This must be initialised statically: the
+ * registration is driven from a netdevice notifier (rmnet_perf) that can fire
+ * on the very first rmnet_dataX registration, i.e. *before* any powersave
+ * setup reaches qmi_rmnet_work_init().  Leaving the head zeroed made
+ * list_add_rcu() dereference head->next == NULL and fault on NULL + 8.
+ */
+static LIST_HEAD(ps_list);
 
 struct rmnet_powersave_work {
 	struct delayed_work work;
@@ -934,7 +942,11 @@ void qmi_rmnet_work_init(void *port)
 		rmnet_ps_wq = NULL;
 		return;
 	}
-	INIT_LIST_HEAD(&ps_list);
+	/*
+	 * ps_list is initialised statically above; do not re-init it here or
+	 * indicators registered before this point (rmnet_perf registers from a
+	 * netdevice notifier) would be silently orphaned.
+	 */
 	INIT_DEFERRABLE_WORK(&rmnet_work->work, qmi_rmnet_check_stats);
 	rmnet_work->port = port;
 	rmnet_get_packets(rmnet_work->port, &rmnet_work->old_rx_pkts,
