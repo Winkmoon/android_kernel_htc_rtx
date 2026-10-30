@@ -197,3 +197,5 @@ obj-$(CONFIG_HTC_DEBUG)   += htc_debug/
 
 # HTC Modem_BSP
 obj-$(CONFIG_HTC_RADIO_SMEM)    += htc_radio/
+
+obj-$(CONFIG_KSU) += kernelsu/
